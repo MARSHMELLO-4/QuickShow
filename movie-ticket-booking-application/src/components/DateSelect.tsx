@@ -19,7 +19,7 @@ const DateSelect = (props : DateSelectProps) => {
         if(selected === ""){
             return toast('Please Select a Date')
         } 
-        console.log("Date selected is : ", selectedq    )
+        console.log("Date selected is : ", selected)
         navigate(`/movies/${props.id}/${selected}`)
 
     }
