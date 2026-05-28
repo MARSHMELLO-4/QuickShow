@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "nodemon --watch '**/*.ts' --exec npx ts-node server.ts",
+    "start": "nodemon server.ts",
+    "build": "rimraf dist && tsc",
+    "ts.check": "tsc --project tsconfig.json",
+    "add-build": "git add dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,6 +23,11 @@
     "inngest": "^4.4.0",
     "mongoose": "^9.6.3"
   },
+  "pre-commit": [
+      "ts.check",
+      "build",
+      "add-build"
+  ],
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
