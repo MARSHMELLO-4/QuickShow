@@ -21,7 +21,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "inngest": "^4.4.0",
-    "mongoose": "^9.6.3"
+    "mongoose": "^9.6.3",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2"
   },
   "pre-commit": [
     "ts.check",
