@@ -7,16 +7,7 @@ import { clerkMiddleware } from '@clerk/express'
 import { inngest,functions } from './inngest';
 
 const app = express();
-const port = 3000;
-const startServer = async () => {
-    await connectDb();
-
-    app.listen(3000, () => {
-        console.log("Server running");
-    });
-};
-
-startServer(); // the connecttion will start
+const port = process.env.PORT || 3000;
 
 //middleware
 app.use(express.json()) //all the req will be passed through the json format in this server
@@ -27,8 +18,12 @@ app.use(clerkMiddleware())
 app.get('/', (req,res) => res.send('server is live'))
 app.use('/api/inngest', serve({ client: inngest, functions }));
 
+const startServer = async () => {
+    await connectDb();
 
-app.listen(port, () => {
-    console.log(`server started at http://localhost:${port}`);
-    
-})
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+    });
+};
+
+startServer(); // the connection will start
