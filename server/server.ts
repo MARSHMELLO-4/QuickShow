@@ -6,6 +6,9 @@ import { serve } from "inngest/express";
 import { clerkMiddleware } from '@clerk/express'
 import { inngest,functions } from './inngest';
 import showRouter from './routes/showRoutes';
+import bookingRouter from './routes/bookingRoutes';
+import adminRouter from './routes/adminRoutes';
+import userRouter from './routes/userRouter';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,7 +22,9 @@ app.use(clerkMiddleware())
 app.get('/', (req,res) => res.send('server is live'))
 app.use('/api/inngest', serve({ client: inngest, functions }));
 app.use('/api/show', showRouter); //this is the base url and we have to append the showRouter
-
+app.use('/api/booking', bookingRouter);  //this is the base url for the bookings 
+app.use('/api/admin', adminRouter) //this route will be used to get all the related data to admin
+app.use('/api/user', userRouter) //this is the userroute
 
 const startServer = async () => {
     await connectDb();

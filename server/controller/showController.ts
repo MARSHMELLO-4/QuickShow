@@ -2,56 +2,101 @@ import axios from "axios";
 import { Request, Response } from "express";
 import Movie, { MovieType } from "../models/movie";
 import Show, { ShowType } from "../models/show";
-import { error } from "node:console";
 
 const axiosConfig = {
   headers: {
     Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
+    Accept: "application/json",
+    Connection: "keep-alive",
   },
-  timeout: 10000,
+  timeout: 20000,
 };
 
-const fetchWithRetry = async (url: string, retries = 3): Promise<any> => {
-  try {
-    return await axios.get(url, axiosConfig);
-  } catch (err) {
-    if (retries === 0) throw err;
+const fetchWithRetry = async (
+  url: string,
+  retries = 3
+): Promise<any> => {
 
-    if (
-      axios.isAxiosError(err) &&
-      (err.code === "ECONNRESET" || err.code === "ETIMEDOUT")
-    ) {
-      console.log(`Retrying request... (${retries} retries left)`);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second before retry
-      return fetchWithRetry(url, retries - 1);
+  try {
+
+    return await axios.get(url, axiosConfig);
+
+  } catch (err: unknown) {
+
+    if (axios.isAxiosError(err)) {
+
+      console.log("TMDB Error Code:", err.code);
+      console.log("TMDB Error Message:", err.message);
+
+      if (
+        retries > 0 &&
+        (
+          err.code === "ECONNRESET" ||
+          err.code === "ETIMEDOUT" ||
+          err.code === "ECONNABORTED"
+        )
+      ) {
+
+        console.log(
+          `Retrying request... ${retries} retries left`
+        );
+
+        await new Promise((resolve) =>
+          setTimeout(resolve, 2000)
+        );
+
+        return fetchWithRetry(url, retries - 1);
+      }
     }
+
     throw err;
   }
 };
 
 //API to get nowplaying movies
-export const getNowPlayingMovies = async (req: Request, res: Response) => {
+export const getNowPlayingMovies = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const { data } = await axios.get(
-      "https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1",
-      axiosConfig,
+
+    const response = await fetchWithRetry(
+      "https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1"
     );
 
-    const movies = data.results;
-    res.json({ success: true, movies: movies });
+    const movies = response.data.results;
+
+    res.json({
+      success: true,
+      movies,
+    });
+
   } catch (err: unknown) {
+
+    console.error("TMDB NOW PLAYING ERROR:", err);
+
     if (axios.isAxiosError(err)) {
-      console.error("TMDB API Error:", err.message, err.code);
-      res.json({
+
+      return res.json({
         success: false,
         message: `API Error: ${err.code} - ${err.message}`,
       });
-    } else if (err instanceof Error) {
-      res.json({
+
+    }
+
+    if (err instanceof Error) {
+
+      return res.json({
         success: false,
         message: err.message,
       });
+
     }
+
+    return res.json({
+      success: false,
+      message: "Unknown server error",
+    });
   }
 };
 
@@ -60,6 +105,9 @@ export const getNowPlayingMovies = async (req: Request, res: Response) => {
 export const addShow = async (req: Request, res: Response) => {
   try {
     const { movieId, showsInput, showPrice } = req.body;
+    console.log("Movie Id : ", movieId)
+    console.log("Shows Input : ", showsInput);
+    console.log("shows prices : ", showPrice);
 
     let movie = await Movie.findById(movieId);
 
@@ -144,11 +192,12 @@ export const addShow = async (req: Request, res: Response) => {
     } else if (err instanceof Error) {
       console.error(err);
       res.json({ success: false, message: err.message });
+    } else {
+      console.error('Unknown error:', err);
+      res.json({ success: false, message: 'An unknown error occurred' });
     }
   }
 };
-
-//api to get all shows from db
 
 export const getShows = async (req: Request, res: Response) => {
   try {
@@ -164,6 +213,9 @@ export const getShows = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       console.error(error);
       res.json({ success: false, message: error.message });
+    } else {
+      console.error('Unknown error:', error);
+      res.json({ success: false, message: 'An unknown error occurred' });
     }
   }
 };
@@ -172,11 +224,20 @@ export const getShows = async (req: Request, res: Response) => {
 export const getShow = async (req: Request, res: Response) => {
   try {
     const { movieId } = req.params;
+    if (!movieId) {
+      return res.json({ success: false, message: "Movie ID is required" });
+    }
+    
     const shows = await Show.find({
       movie: movieId,
       showDateTime: { $gte: new Date() },
     });
     const movie = await Movie.findById(movieId);
+    
+    if (!movie) {
+      return res.json({ success: false, message: "Movie not found" });
+    }
+    
     const dateTime: Record<string, any[]> = {};
     shows.forEach((show: ShowType) => {
       const date = show.showDateTime.toISOString().split("T")[0];
@@ -192,6 +253,12 @@ export const getShow = async (req: Request, res: Response) => {
       res.json({
         success: false,
         message: error.message,
+      });
+    } else {
+      console.error('Unknown error:', error);
+      res.json({
+        success: false,
+        message: 'An unknown error occurred',
       });
     }
   }

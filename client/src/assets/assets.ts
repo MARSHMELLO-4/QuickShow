@@ -22,7 +22,7 @@ export interface genreType {
 
 export interface dummyShowsDataType {
   _id: string;
-  id: number;
+  id: string;
   title: string;
   overview: string;
   poster_path: string;

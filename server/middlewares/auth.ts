@@ -3,10 +3,19 @@
 import { clerkClient, getAuth } from "@clerk/express";
 import { Request, Response, NextFunction } from "express";
 
+// Extend Express Request type to include auth property
+declare global {
+    namespace Express {
+        interface Request {
+            auth?: { userId: string };
+        }
+    }
+}
 
 export const protectAdmin = async (req : Request, res : Response, next : NextFunction) => {
     try { 
-        const { userId  } = getAuth(req);
+        const auth = getAuth(req);
+        const { userId  } = auth;
 
         if (!userId) {
             return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -18,6 +27,8 @@ export const protectAdmin = async (req : Request, res : Response, next : NextFun
             return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
         }
 
+        // Attach auth to request object
+        req.auth = auth;
         next();
     } catch(err) {
         console.error(err);
