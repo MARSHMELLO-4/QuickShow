@@ -5,6 +5,7 @@ import Title from "../../components/admin/Title";
 import { timeFormat } from "../../lib/timeFormat";
 import { isoTimeFormat } from "../../lib/IsoTimeFormat";
 import { dateFormat } from "../../lib/Dateformat";
+import { useAppContext } from "../../context/AppContext";
 
 interface showProps {
   movie: dummyShowsDataType;
@@ -16,23 +17,20 @@ interface showProps {
 const ListShows = () => {
   const currency = import.meta.env.VITE_CURRENCY;
 
+  const { axios, getToken, user } = useAppContext();
+
   const [shows, setShows] = useState<showProps[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getAllShows = async () => {
     try {
-      setShows([
-        {
-          movie: dummyShowsData[0],
-          showDateTime: "2025-06-30T02:30:00.000Z",
-          showPrice: 59,
-          occupiedSeats: {
-            A1: "user_1",
-            B1: "user_2",
-            C1: "user_3",
-          },
+      const token = await getToken();
+      const { data } = await axios.get("/api/admin/all-shows", {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      ]);
+      });
+      setShows(data.shows);
       setLoading(false);
     } catch (e) {
       console.log(e);
@@ -40,8 +38,10 @@ const ListShows = () => {
   };
 
   useEffect(() => {
-    getAllShows(); //this will fetch the data
-  }, []);
+    if (user) {
+      getAllShows(); //this will fetch the data
+    }
+  }, [user]);
 
   return !loading ? (
     <>
@@ -58,12 +58,23 @@ const ListShows = () => {
           </thead>
           <tbody className="text-sm font-light">
             {shows.map((show, index) => {
-              return <tr key={index} className="border-b border-primary/10 bg-primary/5 even:bg-primary/10">
-                <td className="p-2 min-w-45 pl-5">{show.movie.title}</td>
-                <td className="p-2">{dateFormat(show.showDateTime)}</td>
-                <td className="p-2">{Object.keys(show.occupiedSeats).length}</td>
-                <td className="p-2">{currency} {Object.keys(show.occupiedSeats).length * show.showPrice}  </td>
-              </tr>;
+              return (
+                <tr
+                  key={index}
+                  className="border-b border-primary/10 bg-primary/5 even:bg-primary/10"
+                >
+                  <td className="p-2 min-w-45 pl-5">{show.movie.title}</td>
+                  <td className="p-2">{dateFormat(show.showDateTime)}</td>
+                  <td className="p-2">
+                    {Object.keys(show.occupiedSeats).length}
+                  </td>
+                  <td className="p-2">
+                    {currency}{" "}
+                    {Object.keys(show.occupiedSeats).length *
+                      show.showPrice}{" "}
+                  </td>
+                </tr>
+              );
             })}
           </tbody>
         </table>

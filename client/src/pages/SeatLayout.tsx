@@ -11,6 +11,7 @@ import Loading from "../components/Loading";
 import { ArrowRightIcon, ClockIcon } from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
 import toast from "react-hot-toast";
+import { useAppContext } from "../context/AppContext";
 const SeatLayout = () => {
   const groupRows = [
     ["A", "B"],
@@ -29,17 +30,20 @@ const SeatLayout = () => {
     dateTime?: Record<string, DateTimeType[]>;
   }>({});
 
+  const [occupiedSeats, setOccupiedSeats] = useState<string[]>([]);
+
   const navigate = useNavigate();
 
+  const { axios, getToken, user } = useAppContext();
+
   const getShow = async () => {
-    const show = dummyShowsData.find((show) => show._id === id); //from here we will get the individual show
-    console.log("Show selected is : ", show);
-    console.log("Date time is : ", dummyDateTimeData);
-    if (show) {
-      setShow({
-        movie: show,
-        dateTime: dummyDateTimeData,
-      });
+    try {
+      const { data } = await axios.get(`/api/show/${id}`);
+      if (data.success) {
+        setShow(data);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -50,6 +54,9 @@ const SeatLayout = () => {
     if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
       return toast("You can only select 5 seats");
     }
+    if(occupiedSeats.includes(seatId)){
+      return toast('This seat is already booked');
+    }
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((seat) => seat !== seatId)
@@ -59,7 +66,9 @@ const SeatLayout = () => {
 
   const renderSeats = (row: string, count: number = 9) => (
     <div key={row} className="flex gap-2 mt-2">
-      <p className="w-8 flex items-center justify-center text-xs font-semibold">{row}</p>
+      <p className="w-8 flex items-center justify-center text-xs font-semibold">
+        {row}
+      </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
         {Array.from({ length: count }, (_, i) => {
           const seatId = `${row}${i + 1}`;
@@ -67,7 +76,9 @@ const SeatLayout = () => {
             <button
               key={seatId}
               onClick={() => handleSeatClick(seatId)}
-              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer flex items-center justify-center text-xs font-medium transition ${selectedSeats.includes(seatId) ? "bg-primary text-black" : "hover:bg-primary/20"}`}
+              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer ${
+                selectedSeats.includes(seatId) && "bg-primary text-white"
+              } ${occupiedSeats.includes(seatId) && "opacity-50"}`  }
             >
               {i + 1}
             </button>
@@ -77,9 +88,56 @@ const SeatLayout = () => {
     </div>
   );
 
+  const getOccupiedSeats = async () => {
+    try {
+      const { data } = await axios.get(
+        `/api/bookings/seats/${selectedTime?.showId}`,
+      );
+      if (data.success) {
+        setOccupiedSeats(data.occupiedSeats);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const bookTickets = async() => {
+    try {
+      if(!user){ //user not logged in 
+        return toast.error('Please login to proceed')
+      }
+
+      if(!selectedTime || !selectedSeats.length) return toast.error('Please select a time and seats');
+      const token = await getToken()
+      const { data } = await axios.post('/api/booking/create', {showId : selectedTime.showId, selectedSeats}, {
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      });
+
+      if(data.success){
+        toast.success(data.message);
+        navigate('/my-bookings');
+      } else{
+        toast.error(data.message);
+      }
+
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     getShow(); //it will find the show and add it in the show state
   }, []);
+
+  useEffect(() => {
+    if (selectedTime) {
+      getOccupiedSeats();
+    }
+  }, [selectedTime]);
 
   console.log("show date time  : ", show.dateTime);
 
@@ -125,24 +183,19 @@ const SeatLayout = () => {
             {groupRows[0].map((row) => renderSeats(row))}
           </div>
           <div className="grid grid-cols-2 gap-11 mt-2">
-              {
-                groupRows.slice(1).map((group, id) => {
-                  return (
-                    <div key={id}>
-                      {
-                        group.map(row => renderSeats(row))
-                      }
-                    </div>
-                  )
-                })
-              }
+            {groupRows.slice(1).map((group, id) => {
+              return <div key={id}>{group.map((row) => renderSeats(row))}</div>;
+            })}
           </div>
         </div>
       </div>
 
       {/* Checkout Button */}
       <div className="flex justify-center mt-12">
-        <button onClick={() => navigate('/my-bookings')} className="flex items-center gap-1 px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer active:scale-95">
+        <button
+          onClick={() => bookTickets()}
+          className="flex items-center gap-1 px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer active:scale-95"
+        >
           Proceed to checkout
         </button>
       </div>

@@ -13,7 +13,7 @@ const MovieCard = (movie: dummyShowsDataType) => {
           navigate(`/movies/${movie._id}`);
           scrollTo(0, 0);
         }}
-        src={movie.backdrop_path}
+        src={`https://image.tmdb.org/t/p/w500${movie.backdrop_path}`}
         alt=""
         className="rounded-lg h-52 w-full object-cover object-bottom-right cursor-pointer"
       />

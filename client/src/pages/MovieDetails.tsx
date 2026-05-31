@@ -13,6 +13,8 @@ import { timeFormat } from "../lib/timeFormat";
 import DateSelect from "../components/DateSelect";
 import MovieCard from "../components/MovieCard";
 import Loading from "../components/Loading";
+import { useAppContext } from "../context/AppContext";
+import toast from "react-hot-toast";
 const MovieDetails = () => {
   const { id } = useParams();
 
@@ -23,16 +25,44 @@ const MovieDetails = () => {
     dateTime?: Record<string, DateTimeType[]>;
   }>({});
 
+  const { shows, axios, getToken, user, fetchFavtMovies, favoriteMovies } = useAppContext()
+
 
   const getShow = async () => {
-    const show = dummyShowsData.find((show) => show._id === id);
-    if(show) {
-      setShow({
-      movie: show,
-      dateTime: dummyDateTimeData,
-    });
+    try{
+      const { data } = await axios.get(`api/show/${id}`)
+      if(data.success){
+        setShow(data);
+      }
+    } catch(error){
+      console.error(error)
     }
   };
+
+
+  const handleFavt = async () => {
+    try {
+      if(!user){
+        return toast('User must be logged in')
+      }
+
+      const token = await getToken();
+
+      const { data } = await axios.post('api/user/update-favorite', {movieId : id},{
+        headers : {
+          Authorization : `Bearer ${token}`
+        }
+      })
+      
+      if(data.success){
+        await fetchFavtMovies();
+        toast.success(data.message);
+      }
+
+    } catch(error){
+      console.error(error)
+    }
+  } 
 
   useEffect(() => {
     getShow();
@@ -42,7 +72,7 @@ const MovieDetails = () => {
     <div className="px-6 md:px-16 lg:px-40 pt-30 md:pt-50">
       <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
         <img
-          src={show.movie?.poster_path}
+          src={`https://image.tmdb.org/t/p/w500${show.movie?.poster_path}`}
           alt=""
           className="max-md:mx-auto rounded-xl h-104 max-w-70 object-cover"
         />
@@ -84,8 +114,8 @@ const MovieDetails = () => {
               {" "}
               Buy Tickets{" "}
             </a>
-            <button className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95">
-              <Heart className={"w-5 h-5"} />
+            <button onClick={handleFavt} className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95">
+              <Heart className={`w-5 h-5 ${favoriteMovies.find(movie => movie._id === id) ? 'fill-primary text-primary' : ''} `} />
             </button>
           </div>
         </div>
@@ -101,7 +131,7 @@ const MovieDetails = () => {
                 className="flex flex-col items-center text-center"
               >
                 <img
-                  src={cast.profile_path}
+                  src={`https://image.tmdb.org/t/p/w500${cast.profile_path}`}
                   alt=""
                   className="rounded-full h-20 md:h-20 aspect-square object-cover"
                 />
@@ -115,7 +145,7 @@ const MovieDetails = () => {
 
       <p className="text-lg font-medium mt-20 mb-8">You may also like</p>
       <div className="flex flex-wrap max-sm:justify-center gap-8">
-        {dummyShowsData.slice(0, 4).map((movie: dummyShowsDataType, index) => {
+        {shows.slice(0, 4).map((movie: dummyShowsDataType, index) => {
         return <MovieCard key={index} {...movie} />;
       })}
       </div>
