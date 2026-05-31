@@ -9,9 +9,14 @@ import showRouter from './routes/showRoutes';
 import bookingRouter from './routes/bookingRoutes';
 import adminRouter from './routes/adminRoutes';
 import userRouter from './routes/userRouter';
+import { stripeWebhooks } from './controller/stripeWebhooks';
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+
+//stripe middleware hook 
+app.use('api/stripe', express.raw({type : 'application/json'}), stripeWebhooks)
 
 //middleware
 app.use(express.json()) //all the req will be passed through the json format in this server
