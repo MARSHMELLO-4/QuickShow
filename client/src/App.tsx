@@ -35,12 +35,12 @@ const App = () => {
         <Route path='/movies/:id/:date' element={<SeatLayout/>} />
         <Route path='/my-bookings' element={<MyBookings/>} />
         <Route path='/favorite' element={<Favorite/>} />
+        <Route path="/loading/:nextUrl" element={<Loading/>}/>
         <Route path='/admin/*' element={ user  ? <Layout /> : <div className='flex items-center justify-center h-screen'><SignIn/></div>}>
           <Route index element={<Dashboard/>}/>
           <Route path="add-shows" element={<AddShows/>}/>
           <Route path="list-shows" element={<ListShows/>}/>
           <Route path="list-bookings" element={<ListBookings/>}/>
-          <Route path="/loading/:nextUrl" element={<Loading/>}/>
         </Route>
       </Routes>
       { !isAdminRoute && <Footer /> }

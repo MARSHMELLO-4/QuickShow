@@ -446,6 +446,7 @@ export interface DummyBookingDataType {
     amount : number,
     bookedSeats : string[],
     isPaid : boolean
+    paymentLink : string,
 }
 
 export const dummyBookingData : DummyBookingDataType[] = [
