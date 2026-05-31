@@ -2,6 +2,7 @@ import { Request, response, Response } from "express";
 import Stripe from "stripe";
 import Booking from "../models/booking";
 import { err } from "inngest/types";
+import { inngest } from "../inngest";
 
 export const stripeWebhooks = async (req: Request, res: Response) => {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -51,27 +52,30 @@ export const stripeWebhooks = async (req: Request, res: Response) => {
         });
         const session = sessionList.data[0];
 
-        const bookingId  = session.metadata?.bookingId;
+        const bookingId = session.metadata?.bookingId;
 
         if (!bookingId) {
           break;
         }
 
         await Booking.findByIdAndUpdate(bookingId, {
-            isPaid : true,
-            paymentLink : "",
-        })
+          isPaid: true,
+          paymentLink: "",
+        });
+
+        //send confirmation email
+
+        await inngest.send({ name: "app/show.booked", data: { bookingId } });
+
         break;
+      }
 
-      } 
-
-      default : 
-        console.log('Unhandled Event Type : ', event?.type);
-    
+      default:
+        console.log("Unhandled Event Type : ", event?.type);
     }
-    response.json({received : true});
+    response.json({ received: true });
   } catch (error) {
     console.error("Webhook processing error : ", error);
-    response.status(500).send("Internal Server Error")
+    response.status(500).send("Internal Server Error");
   }
 };

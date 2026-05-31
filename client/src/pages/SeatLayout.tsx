@@ -54,8 +54,8 @@ const SeatLayout = () => {
     if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
       return toast("You can only select 5 seats");
     }
-    if(occupiedSeats.includes(seatId)){
-      return toast('This seat is already booked');
+    if (occupiedSeats.includes(seatId)) {
+      return toast("This seat is already booked");
     }
     setSelectedSeats((prev) =>
       prev.includes(seatId)
@@ -76,9 +76,14 @@ const SeatLayout = () => {
             <button
               key={seatId}
               onClick={() => handleSeatClick(seatId)}
-              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer ${
-                selectedSeats.includes(seatId) && "bg-primary text-white"
-              } ${occupiedSeats.includes(seatId) && "opacity-50"}`  }
+              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer transition
+                ${
+                  selectedSeats.includes(seatId)
+                  ? "bg-primary text-white"
+                  : "hover:bg-primary/20"
+                }
+                ${occupiedSeats.includes(seatId) ? " opacity-50 cursor-not-allowed" : ""}
+              `}
             >
               {i + 1}
             </button>
@@ -91,7 +96,7 @@ const SeatLayout = () => {
   const getOccupiedSeats = async () => {
     try {
       const { data } = await axios.get(
-        `/api/bookings/seats/${selectedTime?.showId}`,
+        `/api/booking/seats/${selectedTime?.showId}`,
       );
       if (data.success) {
         setOccupiedSeats(data.occupiedSeats);
@@ -103,30 +108,35 @@ const SeatLayout = () => {
     }
   };
 
-  const bookTickets = async() => {
+  const bookTickets = async () => {
     try {
-      if(!user){ //user not logged in 
-        return toast.error('Please login to proceed')
+      if (!user) {
+        //user not logged in
+        return toast.error("Please login to proceed");
       }
 
-      if(!selectedTime || !selectedSeats.length) return toast.error('Please select a time and seats');
-      const token = await getToken()
-      const { data } = await axios.post('/api/booking/create', {showId : selectedTime.showId, selectedSeats}, {
-        headers : {
-          Authorization : `Bearer ${token}`
-        }
-      });
+      if (!selectedTime || !selectedSeats.length)
+        return toast.error("Please select a time and seats");
+      const token = await getToken();
+      const { data } = await axios.post(
+        "/api/booking/create",
+        { showId: selectedTime.showId, selectedSeats },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-      if(data.success){
+      if (data.success) {
         window.location.href = data.url;
-      } else{
+      } else {
         toast.error(data.message);
       }
-
-    } catch(error) {
-      console.error(error)
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     getShow(); //it will find the show and add it in the show state
