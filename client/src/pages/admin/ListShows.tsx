@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { dummyShowsData, type dummyShowsDataType } from "../../assets/assets";
+import  { useEffect, useState } from "react";
+import {  type dummyShowsDataType } from "../../assets/assets";
 import Loading from "../../components/Loading";
 import Title from "../../components/admin/Title";
-import { timeFormat } from "../../lib/timeFormat";
-import { isoTimeFormat } from "../../lib/IsoTimeFormat";
 import { dateFormat } from "../../lib/Dateformat";
 import { useAppContext } from "../../context/AppContext";
 

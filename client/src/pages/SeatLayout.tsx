@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   assets,
-  dummyDateTimeData,
-  dummyShowsData,
   type DateTimeType,
   type dummyShowsDataType,
 } from "../assets/assets";
 import Loading from "../components/Loading";
-import { ArrowRightIcon, ClockIcon } from "lucide-react";
+import { ClockIcon } from "lucide-react";
 import BlurCircle from "../components/BlurCircle";
 import toast from "react-hot-toast";
 import { useAppContext } from "../context/AppContext";
@@ -31,8 +29,6 @@ const SeatLayout = () => {
   }>({});
 
   const [occupiedSeats, setOccupiedSeats] = useState<string[]>([]);
-
-  const navigate = useNavigate();
 
   const { axios, getToken, user } = useAppContext();
 

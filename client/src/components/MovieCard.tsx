@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { StarIcon } from "lucide-react";
 import type { dummyShowsDataType } from "../assets/assets";

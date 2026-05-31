@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  dummyDateTimeData,
-  dummyShowsData,
   type DateTimeType,
   type dummyShowsDataType,
   type genreType,

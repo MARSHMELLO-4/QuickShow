@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import {
-  dummyBookingData,
   type DummyBookingDataType,
 } from "../../assets/assets";
 import Loading from "../../components/Loading";
@@ -11,7 +10,7 @@ import { useAppContext } from "../../context/AppContext";
 const ListBookings = () => {
   const currency = import.meta.env.VITE_CURRENCY;
 
-  const {axios, getToken, user} = useAppContext();
+  const {axios, getToken } = useAppContext();
 
   const [bookings, setBookings] = useState<DummyBookingDataType[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -156,7 +156,7 @@ const dummyCastsData: dummyCastType[] = [
 export const dummyShowsData : dummyShowsDataType[] = [
   {
     _id: "324544",
-    id: 324544,
+    id: "324544",
     title: "In the Lost Lands",
     overview:
       "A queen sends the powerful and feared sorceress Gray Alys to the ghostly wilderness of the Lost Lands in search of a magical power, where she and her guide, the drifter Boyce, must outwit and outfight both man and demon.",
@@ -179,7 +179,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "1232546",
-    id: 1232546,
+    id: "1232546",
     title: "Until Dawn",
     overview:
       "One year after her sister Melanie mysteriously disappeared, Clover and her friends head into the remote valley where she vanished in search of answers. Exploring an abandoned visitor center, they find themselves stalked by a masked killer and horrifically murdered one by one...only to wake up and find themselves back at the beginning of the same evening.",
@@ -201,7 +201,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "552524",
-    id: 552524,
+    id: "552524",
     title: "Lilo & Stitch",
     overview:
       "The wildly funny and touching story of a lonely Hawaiian girl and the fugitive alien who helps to mend her broken family.",
@@ -224,7 +224,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "668489",
-    id: 668489,
+    id: "668489",
     title: "Havoc",
     overview:
       "When a drug heist swerves lethally out of control, a jaded cop fights his way through a corrupt city's criminal underworld to save a politician's son.",
@@ -247,7 +247,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "950387",
-    id: 950387,
+    id: "950387",
     title: "A Minecraft Movie",
     overview:
       "Four misfits find themselves struggling with ordinary problems when they are suddenly pulled through a mysterious portal into the Overworld: a bizarre, cubic wonderland that thrives on imagination. To get back home, they'll have to master this world while embarking on a magical quest with an unexpected, expert crafter, Steve.",
@@ -271,7 +271,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "575265",
-    id: 575265,
+    id: "575265",
     title: "Mission: Impossible - The Final Reckoning",
     overview:
       "Ethan Hunt and team continue their search for the terrifying AI known as the Entity — which has infiltrated intelligence networks all over the globe — with the world's governments and a mysterious ghost from Hunt's past on their trail. Joined by new allies and armed with the means to shut the Entity down for good, Hunt is in a race against time to prevent the world as we know it from changing forever.",
@@ -294,7 +294,7 @@ export const dummyShowsData : dummyShowsDataType[] = [
   },
   {
     _id: "986056",
-    id: 986056,
+    id: "986056",
     title: "Thunderbolts*",
     overview:
       "After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts.",
@@ -362,7 +362,7 @@ export interface DummyDashboardDataType{
 }
 
 export const dummyDashboardData : DummyDashboardDataType= {
-  totalBookings: 14,
+  totalBookings: 14,  
   totalRevenue: 1517,
   totalUser: 5,
   activeShows: [
@@ -462,6 +462,7 @@ export const dummyBookingData : DummyBookingDataType[] = [
     amount: 98,
     bookedSeats: ["D1", "D2"],
     isPaid: false,
+    paymentLink: ""
   },
   {
     _id: "68396334fb83252d82e17295",
@@ -475,6 +476,7 @@ export const dummyBookingData : DummyBookingDataType[] = [
     amount: 49,
     bookedSeats: ["A1"],
     isPaid: true,
+    paymentLink: ""
   },
   {
     _id: "68396334fb83252d82e17295",
@@ -488,5 +490,6 @@ export const dummyBookingData : DummyBookingDataType[] = [
     amount: 147,
     bookedSeats: ["A1", "A2", "A3"],
     isPaid: true,
+    paymentLink: ""
   },
 ];

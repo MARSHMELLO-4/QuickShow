@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { dummyBookingData, type DummyBookingDataType } from "../assets/assets";
+import  { useEffect, useState } from "react";
+import {type DummyBookingDataType } from "../assets/assets";
 import Loading from "../components/Loading";
 import BlurCircle from "../components/BlurCircle";
 import { timeFormat } from "../lib/timeFormat";
 import { dateFormat } from "../lib/Dateformat";
-import { Currency } from "lucide-react";
 import { useAppContext } from "../context/AppContext";
 import { Link } from "react-router-dom";
 
