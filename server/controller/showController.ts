@@ -7,43 +7,27 @@ const axiosConfig = {
   headers: {
     Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
     Accept: "application/json",
-    Connection: "keep-alive",
   },
   timeout: 20000,
 };
 
-const fetchWithRetry = async (
-  url: string,
-  retries = 3
-): Promise<any> => {
-
+const fetchWithRetry = async (url: string, retries = 3): Promise<any> => {
   try {
-
     return await axios.get(url, axiosConfig);
-
   } catch (err: unknown) {
-
     if (axios.isAxiosError(err)) {
-
       console.log("TMDB Error Code:", err.code);
       console.log("TMDB Error Message:", err.message);
 
       if (
         retries > 0 &&
-        (
-          err.code === "ECONNRESET" ||
+        (err.code === "ECONNRESET" ||
           err.code === "ETIMEDOUT" ||
-          err.code === "ECONNABORTED"
-        )
+          err.code === "ECONNABORTED")
       ) {
+        console.log(`Retrying request... ${retries} retries left`);
 
-        console.log(
-          `Retrying request... ${retries} retries left`
-        );
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000)
-        );
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         return fetchWithRetry(url, retries - 1);
       }
@@ -54,14 +38,10 @@ const fetchWithRetry = async (
 };
 
 //API to get nowplaying movies
-export const getNowPlayingMovies = async (
-  req: Request,
-  res: Response
-) => {
+export const getNowPlayingMovies = async (req: Request, res: Response) => {
   try {
-
     const response = await fetchWithRetry(
-      "https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1"
+      "https://api.themoviedb.org/3/movie/now_playing?language=en-US&page=1",
     );
 
     const movies = response.data.results;
@@ -70,27 +50,21 @@ export const getNowPlayingMovies = async (
       success: true,
       movies,
     });
-
   } catch (err: unknown) {
-
     console.error("TMDB NOW PLAYING ERROR:", err);
 
     if (axios.isAxiosError(err)) {
-
       return res.json({
         success: false,
         message: `API Error: ${err.code} - ${err.message}`,
       });
-
     }
 
     if (err instanceof Error) {
-
       return res.json({
         success: false,
         message: err.message,
       });
-
     }
 
     return res.json({
@@ -105,7 +79,7 @@ export const getNowPlayingMovies = async (
 export const addShow = async (req: Request, res: Response) => {
   try {
     const { movieId, showsInput, showPrice } = req.body;
-    console.log("Movie Id : ", movieId)
+    console.log("Movie Id : ", movieId);
     console.log("Shows Input : ", showsInput);
     console.log("shows prices : ", showPrice);
 
@@ -193,29 +167,44 @@ export const addShow = async (req: Request, res: Response) => {
       console.error(err);
       res.json({ success: false, message: err.message });
     } else {
-      console.error('Unknown error:', err);
-      res.json({ success: false, message: 'An unknown error occurred' });
+      console.error("Unknown error:", err);
+      res.json({ success: false, message: "An unknown error occurred" });
     }
   }
 };
 
 export const getShows = async (req: Request, res: Response) => {
   try {
-    const shows = await Show.find({ showDateTime: { $gte: new Date() } })
+    const shows = await Show.find({
+      showDateTime: { $gte: new Date() },
+    })
       .populate("movie")
       .sort({ showDateTime: 1 });
 
-    // filter unique shows
-    const uniqueShows = new Set(shows.map((show) => show.movie));
+    // remove duplicates properly
+    const uniqueMoviesMap = new Map();
 
-    res.json({ success: true, shows: Array.from(uniqueShows) });
+    shows.forEach((show: any) => {
+      if (show.movie && !uniqueMoviesMap.has(show.movie._id.toString())) {
+        uniqueMoviesMap.set(show.movie._id.toString(), show.movie);
+      }
+    });
+
+    const uniqueMovies = Array.from(uniqueMoviesMap.values());
+
+    res.json({
+      success: true,
+      shows: uniqueMovies,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error);
       res.json({ success: false, message: error.message });
     } else {
-      console.error('Unknown error:', error);
-      res.json({ success: false, message: 'An unknown error occurred' });
+      res.json({
+        success: false,
+        message: "Unknown error occurred",
+      });
     }
   }
 };
@@ -227,19 +216,19 @@ export const getShow = async (req: Request, res: Response) => {
     if (!movieId) {
       return res.json({ success: false, message: "Movie ID is required" });
     }
-    
+
     const shows = await Show.find({
       movie: movieId,
       showDateTime: { $gte: new Date() },
     });
     const movie = await Movie.findById(movieId);
-    
+
     if (!movie) {
       return res.json({ success: false, message: "Movie not found" });
     }
-    
+
     const dateTime: Record<string, any[]> = {};
-    shows.forEach((show: ShowType) => {
+    shows.forEach((show: any) => {  
       const date = show.showDateTime.toISOString().split("T")[0];
       if (!dateTime[date]) {
         dateTime[date] = [];
@@ -255,10 +244,10 @@ export const getShow = async (req: Request, res: Response) => {
         message: error.message,
       });
     } else {
-      console.error('Unknown error:', error);
+      console.error("Unknown error:", error);
       res.json({
         success: false,
-        message: 'An unknown error occurred',
+        message: "An unknown error occurred",
       });
     }
   }
