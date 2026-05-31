@@ -6,6 +6,7 @@ import Show, { ShowType } from "../models/show";
 import Booking from "../models/booking";
 import stripe from "stripe";
 import { MovieType } from "../models/movie";
+import { inngest } from "../inngest";
 
 const checkSeatAvailability = async (
   showId: mongoose.Types.ObjectId,
@@ -115,6 +116,14 @@ export const createBooking = async (req: Request, res: Response) => {
     booking.paymentLink = session.url;
     //save the bookin in data base
     await booking.save();
+
+    ///running ingest scehduler function to check payment sttaus after 10 mins
+    await inngest.send({
+      name : "app/checkpayment",
+      data : {
+        bookingId : booking._id.toString(),
+      }
+    })
 
     res.json({
       success: true,
