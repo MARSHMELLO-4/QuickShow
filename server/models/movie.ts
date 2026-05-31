@@ -43,9 +43,9 @@ const movieSchema = new mongoose.Schema({
   },
   original_language: { type: String },
   tagline: { type: String },
-  genred: {
+  genres: {
     type: Array,
-    requied: true,
+    required: true,
   },
   casts: {
     type: Array,

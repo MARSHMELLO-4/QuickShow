@@ -4,7 +4,7 @@ import { protectAdmin } from "../middlewares/auth";
 
 const bookingRouter = express.Router();
 
-bookingRouter.post('/create', createBooking);
+bookingRouter.post('/create', protectAdmin, createBooking);
 bookingRouter.get('/seats/:showId', getOcccupiedSeats);
 
 

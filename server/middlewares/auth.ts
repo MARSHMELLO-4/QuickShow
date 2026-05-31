@@ -35,3 +35,35 @@ export const protectAdmin = async (req : Request, res : Response, next : NextFun
         res.status(500).json({ success: false, message: 'Authentication error' });
     }
 }
+
+
+export const protectUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const auth = getAuth(req);
+
+        if (!auth.userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        req.auth = {
+            userId: auth.userId,
+        };
+
+        next();
+
+    } catch (err) {
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            message: "Authentication error",
+        });
+    }
+};
